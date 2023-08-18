@@ -19,7 +19,10 @@
 </body>
 <script lang="ja">
     async function upload() {
-        var headers = {};
+        var headers = function(){
+	return { "TestHeader" : "abc" };
+        };
+
         var submitBody = {
             value1 : "abc"
         };

@@ -164,8 +164,13 @@ class BlockHandler {
             };
 
             if (this.uploader.headers) {
-                for (var p in this.uploader.headers) {
-                    headers[p] = this.uploader.headers[p];
+                var curHeaders = this.uploader.headers;
+
+                if (typeof curHeaders == "function") {
+                    curHeaders = curHeaders();
+                }
+                for (var p in curHeaders) {
+                    headers[p] = curHeaders[p];
                 }
             }
 

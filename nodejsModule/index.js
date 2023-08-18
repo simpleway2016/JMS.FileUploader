@@ -1,2 +1,2 @@
 var obj = require("./JMSUploadFile.js");
-module.exports = obj.JMSUploadFile;
+module.exports = obj.JmsUploader;

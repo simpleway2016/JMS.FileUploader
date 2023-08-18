@@ -178,7 +178,7 @@ var BlockHandler = /** @class */ (function () {
         this.size = 0;
         this.upload = function () {
             return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                var binaryData, headers, p, ret, text;
+                var binaryData, headers, curHeaders, p, ret, text;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -187,8 +187,12 @@ var BlockHandler = /** @class */ (function () {
                                 'Content-Type': 'application/json'
                             };
                             if (this.uploader.headers) {
-                                for (p in this.uploader.headers) {
-                                    headers[p] = this.uploader.headers[p];
+                                curHeaders = this.uploader.headers;
+                                if (typeof curHeaders == "function") {
+                                    curHeaders = curHeaders();
+                                }
+                                for (p in curHeaders) {
+                                    headers[p] = curHeaders[p];
                                 }
                             }
                             headers["Jack-Upload-Length"] = [this.uploader.fileLength, this.position, this.size];
