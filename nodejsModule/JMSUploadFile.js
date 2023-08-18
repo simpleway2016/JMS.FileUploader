@@ -55,7 +55,7 @@ var JmsUploader = /** @class */ (function () {
         this.canceled = false;
         this.completedSize = 0;
         this.onCompleted = function () { return __awaiter(_this, void 0, void 0, function () {
-            var headers, p, ret, text;
+            var headers, curHeaders, p, ret, text;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -63,8 +63,12 @@ var JmsUploader = /** @class */ (function () {
                             'Content-Type': 'application/json'
                         };
                         if (this.headers) {
-                            for (p in this.headers) {
-                                headers[p] = this.headers[p];
+                            curHeaders = this.headers;
+                            if (typeof curHeaders == "function") {
+                                curHeaders = curHeaders();
+                            }
+                            for (p in curHeaders) {
+                                headers[p] = curHeaders[p];
                             }
                         }
                         headers["Jack-Upload-Length"] = this.fileLength;
@@ -144,8 +148,11 @@ var JmsUploader = /** @class */ (function () {
         if (file.name) {
             this.fileName = file.name;
         }
-        if (headers) {
+        if (headers && typeof headers != "function") {
             this.headers = JSON.parse(JSON.stringify(headers));
+        }
+        else {
+            this.headers = headers;
         }
         if (jsonObject) {
             this.jsonObject = JSON.parse(JSON.stringify(jsonObject));

@@ -28,8 +28,11 @@ export class JmsUploader {
             this.fileName = file.name;
         }
 
-        if (headers) {
+        if (headers && typeof headers != "function") {
             this.headers = JSON.parse(JSON.stringify(headers));
+        }
+        else {
+            this.headers = headers;
         }
 
         if (jsonObject) {
@@ -49,8 +52,13 @@ export class JmsUploader {
         };
 
         if (this.headers) {
-            for (var p in this.headers) {
-                headers[p] = this.headers[p];
+            var curHeaders = this.headers;
+
+            if (typeof curHeaders == "function") {
+                curHeaders = curHeaders();
+            }
+            for (var p in curHeaders) {
+                headers[p] = curHeaders[p];
             }
         }
 
