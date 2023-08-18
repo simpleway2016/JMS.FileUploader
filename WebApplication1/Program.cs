@@ -14,6 +14,7 @@ namespace WebApplication1
     {
         public static void Main(string[] args)
         {
+            Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             CreateWebHostBuilder(args).Build().Run();
         }
 

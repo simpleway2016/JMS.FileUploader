@@ -1,3 +1,0 @@
-@chcp 65001
-@echo "abc你好"
-pause
