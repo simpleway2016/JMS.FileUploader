@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication1", "WebAppli
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JMS.FileUploader.AspNetCore", "JMS.FileUploader.AspNetCore\JMS.FileUploader.AspNetCore.csproj", "{2733DCE4-C440-40EA-A37D-D726572B0BC3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JMS.UploadClient", "JMS.UploadClient\JMS.UploadClient.csproj", "{032DA904-0B29-444A-8E59-D0E35898843F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2733DCE4-C440-40EA-A37D-D726572B0BC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2733DCE4-C440-40EA-A37D-D726572B0BC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2733DCE4-C440-40EA-A37D-D726572B0BC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{032DA904-0B29-444A-8E59-D0E35898843F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{032DA904-0B29-444A-8E59-D0E35898843F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{032DA904-0B29-444A-8E59-D0E35898843F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{032DA904-0B29-444A-8E59-D0E35898843F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
