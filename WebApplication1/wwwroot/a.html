@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script>
+        var exports = {};
+        var require = function (v) {
+            return new exports[v];
+        }
+    </script>
+    <script src="uuid.js" type="text/javascript"></script>
+    <script src="JMSUploadFile.js" type="text/javascript"></script>
+</head>
+<body>
+    <input id="file" type="file" />
+    <button onclick="upload()">
+        upload
+    </button>
+    <div id="info"></div>
+</body>
+<script lang="ja">
+    async function upload() {
+        var uploader = new JmsUploader("Main/Test2", document.querySelector("#file").files[0], null, {
+            name : "abc"
+        });
+        uploader.onUploading = function (percent) {
+            document.querySelector("#info").innerHTML = percent + "%";
+        };
+
+        var ret = await uploader.upload();
+        alert(ret);
+    }
+</script>
+</html>

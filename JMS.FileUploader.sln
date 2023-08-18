@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33103.184
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{8732F2F8-771A-4D76-9AF3-66CFCC0D1B68}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JMS.FileUploader.AspNetCore", "JMS.FileUploader.AspNetCore\JMS.FileUploader.AspNetCore.csproj", "{2733DCE4-C440-40EA-A37D-D726572B0BC3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8732F2F8-771A-4D76-9AF3-66CFCC0D1B68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8732F2F8-771A-4D76-9AF3-66CFCC0D1B68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8732F2F8-771A-4D76-9AF3-66CFCC0D1B68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8732F2F8-771A-4D76-9AF3-66CFCC0D1B68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2733DCE4-C440-40EA-A37D-D726572B0BC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2733DCE4-C440-40EA-A37D-D726572B0BC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2733DCE4-C440-40EA-A37D-D726572B0BC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2733DCE4-C440-40EA-A37D-D726572B0BC3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EB45EB1F-BDE5-4DBF-BD40-4B349FBFC00C}
+	EndGlobalSection
+EndGlobal
