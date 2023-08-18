@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\JMS.FileUploader.AspNetCore\JMS.FileUploader.AspNetCore.csproj" />
     <ProjectReference Include="..\JMS.UploadFile.AspNetCore\JMS.FileUploader.AspNetCore.csproj" />
   </ItemGroup>
 
