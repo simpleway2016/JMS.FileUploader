@@ -239,7 +239,6 @@ class BlockHandler {
                     body: binaryData
                 });
             } catch (e) {
-                console.error(e);
                 reject(e);
                 return;
             }
