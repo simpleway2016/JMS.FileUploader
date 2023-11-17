@@ -364,3 +364,5 @@ FodyWeavers.xsd
 /WebApplication1/temp
 /WebApplication1/wwwroot/JMSUploadFile.js
 /nodejsModule/JMSUploadFile.js
+/WebApplication2/wwwroot/JMSUploadFile.js
+/nodejsModule/JMSUploadFile.d.ts
