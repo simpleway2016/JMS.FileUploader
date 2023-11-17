@@ -192,11 +192,17 @@ class BlockHandler {
             
             headers["Upload-Id"] = this.uploader.tranId;
 
-            var ret = await fetch(`${this.uploader.url}`, {
-                method: 'POST',
-                headers: headers,
-                body: binaryData
-            });
+            var ret: Response;
+            try {
+                ret = await fetch(`${this.uploader.url}`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: binaryData
+                });
+            } catch (e) {
+                reject(e);
+                return;
+            }
 
             var text = await ret.text();
             if (ret.status >= 300 || ret.status < 200) {
