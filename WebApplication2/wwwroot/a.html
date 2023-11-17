@@ -13,7 +13,8 @@
     <script src="JMSUploadFile.js" type="text/javascript"></script>
 </head>
 <body>
-    <input id="file" type="file" />
+    <input id="file" multiple type="file" />
+    <input id="file2" multiple type="file" />
     <button onclick="upload()">
         upload
     </button>
@@ -21,13 +22,14 @@
 </body>
 <script lang="ja">
     async function upload() {
-        var uploader = new JmsUploader("Main/Test2", document.querySelector("#file").files[0], null, {
+
+        var uploader = new JmsUploader("Main/Test2", [document.querySelector("#file").files, document.querySelector("#file2").files], null, {
             name : "abc"
         });
         uploader.onUploading = function (percent) {
             document.querySelector("#info").innerHTML = percent + "%";
         };
-
+  
         var ret = await uploader.upload();
         alert(ret);
     }

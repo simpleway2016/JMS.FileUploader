@@ -1,6 +1,7 @@
 ﻿using JMS;
 using System.IO;
 using System.Net.Http;
+using System.Web;
 using Way.Lib;
 
 namespace JMS
@@ -55,7 +56,7 @@ namespace JMS
 
             var client = _httpClientFactory.CreateClient("");
             client.DefaultRequestHeaders.Add("Jack-Upload-Length", this.FileLength.ToString());
-            client.DefaultRequestHeaders.Add("Name", this.FileName);
+            client.DefaultRequestHeaders.Add("Name",HttpUtility.UrlEncode( this.FileName, System.Text.Encoding.UTF8));
             client.DefaultRequestHeaders.Add("Upload-Id", this.TranId);
 
             using var response = await client.PostAsync(_url, content);//改成自己的

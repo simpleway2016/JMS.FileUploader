@@ -1,19 +1,20 @@
 export declare class JmsUploader {
     file: Blob;
-    fileLength: number;
     headers: any;
     jsonObject: any;
     url: string;
     tranId: string;
-    fileName: string;
+    allFiles: Blob[];
+    totalFilesLength: number;
     onUploading: (percent: number) => void;
     private completed;
     private currentIndex;
+    private fileItemIndex;
     private maxIndex;
     private blockSize;
     private canceled;
     completedSize: number;
-    constructor(url: string, file: File, headers: any, jsonObject: any);
+    constructor(url: string, file: File | File[] | FileList, headers: any, jsonObject: any);
     private onCompleted;
     private next;
     private uploadResolve;

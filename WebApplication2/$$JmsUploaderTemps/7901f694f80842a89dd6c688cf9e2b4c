@@ -1,0 +1,31 @@
+imXhBADN2NAc
+
+65016666
+
+11010101100732
+awmbtc
+
+https://18.162.148.151:10028
+ty
+f0bda6366bff7
+
+
+Builder230821Bot
+6439295413:AAF2eIuwp4q4EAY3d8PJt5edvNN4StHIukg
+-988780915
+
+https://api.telegram.org/bot6439295413:AAF2eIuwp4q4EAY3d8PJt5edvNN4StHIukg/getUpdates
+Unable to find an entry point named 'forkpty' in shared library 'libc'.
+
+ldconfig -p | grep libc.so
+strings /lib/x86_64-linux-gnu/libc.so.6 |grep GLIBC_
+
+yum install make
+https://jingyan.baidu.com/article/d2b1d102ec07565c7e37d4c0.html
+
+wslconfig /list
+wslconfig /setdefault Name
+
+gcc -fPIC -shared -o ../mylib.so ../a.c -lutil
+需要在centos下编译，不要在ubuntu，ubuntu没有libutil.so，它编译会依赖libc.so.6，编译好的文件无法在centos下运行
+

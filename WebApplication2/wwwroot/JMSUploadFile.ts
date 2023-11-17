@@ -1,32 +1,55 @@
 ﻿import { v4 as uuidv4 } from 'uuid';
 export class JmsUploader {
     file: Blob;
-    fileLength = 0;
     headers: any = undefined;
     jsonObject: any = undefined;
     url = "";
     tranId = "";
 
-    fileName = "";
+    allFiles: Blob[];
+    totalFilesLength = 0;
+
     onUploading: (percent: number) => void = <any>undefined;
     private completed = 0;
     private currentIndex = 0;
+    private fileItemIndex = 0;
     private maxIndex = 0;
     private blockSize = 102400;
     private canceled = false;
     completedSize = 0;
 
-    constructor(url: string, file: File, headers: any, jsonObject: any) {
-        this.file = file;
+    constructor(url: string, file: File | File[] | FileList, headers: any, jsonObject: any) {
+        if (file instanceof FileList) {
+            this.allFiles = [];
+            for (var i = 0; i < file.length; i++) {
+                this.allFiles[i] = file[i];
+            }
+            this.allFiles.forEach(f => this.totalFilesLength += f.size);
+        }
+        else if (Array.isArray(file)) {
+            this.allFiles = [];
+            for (var i = 0; i < file.length; i++) {
+                var arrItem = file[i];
+                if (arrItem instanceof FileList) {
+                    for (var j = 0; j < arrItem.length; j++) {
+                        this.allFiles.push(arrItem[j]);
+                    }
+                }
+                else if ("size" in arrItem) {
+                    this.allFiles.push(arrItem);
+                }
+            }
+            file.forEach(f => this.totalFilesLength += f.size);
+        }
+        else if ("size" in file) {
+            this.allFiles = [file];
+            this.totalFilesLength = file.size;
+        }
+        else {
+            throw "file无法识别";
+        }
         this.url = url;
-        if (file.size) {
-            this.fileLength = file.size;
 
-        }
-
-        if (file.name) {
-            this.fileName = file.name;
-        }
 
         if (headers && typeof headers != "function") {
             this.headers = JSON.parse(JSON.stringify(headers));
@@ -39,11 +62,7 @@ export class JmsUploader {
             this.jsonObject = JSON.parse(JSON.stringify(jsonObject));
         }
 
-        this.maxIndex = parseInt(<any>(this.fileLength / this.blockSize));
-        if (this.fileLength % this.blockSize > 0) {
-            this.maxIndex++;
-        }
-        this.maxIndex--;
+       
     }
 
     private onCompleted = async () => {
@@ -62,8 +81,8 @@ export class JmsUploader {
             }
         }
 
-        headers["Jack-Upload-Length"] = this.fileLength;
-        headers["Name"] = (<any>this.file).name;
+        headers["Jack-Upload-Length"] = this.file.size;
+        headers["Name"] = encodeURIComponent((<any>this.file).name);
         headers["Upload-Id"] = this.tranId;
 
         var ret = await fetch(`${this.url}`, {
@@ -90,12 +109,19 @@ export class JmsUploader {
         this.completed++;
         this.completedSize += uploadedSize;
         if (this.completed == this.maxIndex + 1) {
-            this.onCompleted();
+            this.fileItemIndex++;
+
+            if (this.fileItemIndex >= this.allFiles.length) {
+                this.onCompleted();
+            }
+            else {
+                this.upload();
+            }
             return;
         }
 
         if (this.onUploading) {
-            this.onUploading(parseInt(<any>(this.completedSize * 100 / this.fileLength)));
+            this.onUploading(parseInt(<any>(this.completedSize * 100 / this.totalFilesLength)));
         }
 
         if (this.currentIndex == this.maxIndex) {
@@ -106,7 +132,7 @@ export class JmsUploader {
 
         var size = this.blockSize;
         if (this.currentIndex == this.maxIndex) {
-            size = this.fileLength - this.blockSize * this.maxIndex;
+            size = this.file.size - this.blockSize * this.maxIndex;
         }
         new BlockHandler(this, this.currentIndex * this.blockSize, size).upload().then(size => {
             this.next(size);
@@ -116,14 +142,26 @@ export class JmsUploader {
     private uploadResolve: any = undefined;
     private uploadReject: any = undefined;
     upload = (): Promise<any> => {
+        this.file = this.allFiles[this.fileItemIndex];
+        this.maxIndex = parseInt(<any>(this.file.size / this.blockSize));
+        if (this.file.size % this.blockSize > 0) {
+            this.maxIndex++;
+        }
+        this.maxIndex--;
+
         this.completed = 0;
         this.completedSize = 0;
-        this.tranId = uuidv4();
+
+        if (this.fileItemIndex == 0) {
+            this.tranId = uuidv4();
+        }
         this.currentIndex = Math.min(5, this.maxIndex);
 
         return new Promise((resolve, reject) => {
-            this.uploadResolve = resolve;
-            this.uploadReject = reject;
+            if (this.fileItemIndex == 0) {
+                this.uploadResolve = resolve;
+                this.uploadReject = reject;
+            }
             for (var i = 0; i <= 5 && i <= this.maxIndex; i++) {
                 this.handleItem(i);
             }
@@ -133,6 +171,7 @@ export class JmsUploader {
 
 
     cancel = () => {
+        this.fileItemIndex = 0;
         this.canceled = true;
         if (this.uploadReject) {
             this.uploadReject("canceled");
@@ -142,7 +181,7 @@ export class JmsUploader {
     private handleItem(index: number) {
         var size = this.blockSize;
         if (index == this.maxIndex) {
-            size = this.fileLength - this.blockSize * this.maxIndex;
+            size = this.file.size - this.blockSize * this.maxIndex;
         }
         new BlockHandler(this, index * this.blockSize, size).upload().then(size => {
             this.next(size);
@@ -182,9 +221,9 @@ class BlockHandler {
                 }
             }
 
-            headers["Jack-Upload-Length"] = [this.uploader.fileLength, this.position, this.size];
+            headers["Jack-Upload-Length"] = `${this.uploader.file.size},${this.position},${this.size}`;
             if ((<any>this.uploader.file).name) {
-                headers["Name"] = (<any>this.uploader.file).name;
+                headers["Name"] = encodeURIComponent((<any>this.uploader.file).name);
             }
             else {
                 headers["Name"] = "none";
@@ -200,6 +239,7 @@ class BlockHandler {
                     body: binaryData
                 });
             } catch (e) {
+                console.error(e);
                 reject(e);
                 return;
             }

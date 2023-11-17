@@ -5,6 +5,7 @@ using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,10 +29,15 @@ namespace JMS.FileUploader.AspNetCore
                 {
                     if (o.ToString().Contains(",") == false)
                     {
-                        var uploadingInfo = Uploader.GetUploadingInfo(context);
-                        context.Request.Headers.Add("FilePath", uploadingInfo.FilePath);
+                        
+                        var uploadingInfos = Uploader.GetUploadingInfo(context);
+                        context.Request.Headers["Name"] = uploadingInfos.Select(m=>m.Name).ToArray();
+                        context.Request.Headers.Add("FilePath", uploadingInfos.Select(m => m.FilePath).ToArray());
                         await next();
-                        uploadingInfo.DeleteFile();
+                        foreach (var item in uploadingInfos)
+                        {
+                            item.DeleteFile();
+                        }
                     }
                     else
                     {
@@ -68,6 +74,7 @@ namespace JMS.FileUploader.AspNetCore
         /// <param name="position"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        Task OnReceived(HttpContext context, string fileName, Stream inputStream, long fileSize, long position, int size);
+        Task OnReceived(HttpContext context,string uploadId, string fileName, Stream inputStream, long fileSize, long position, int size);
+        Task OnUploadCompleted(HttpContext context, string uploadId, string fileName);
     }
 }

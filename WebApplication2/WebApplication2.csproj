@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\index.d.ts" />
+    <Content Remove="wwwroot\JMSUploadFile.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JMS.FileUploader.AspNetCore\JMS.FileUploader.AspNetCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\index.d.ts" />
+    <TypeScriptCompile Include="wwwroot\JMSUploadFile.ts" />
+  </ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<TypeScriptTarget>ES5</TypeScriptTarget>
+		<TypeScriptJSXEmit>React</TypeScriptJSXEmit>
+		<TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
+		<TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+		<TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+		<TypeScriptRemoveComments>False</TypeScriptRemoveComments>
+		<TypeScriptOutFile></TypeScriptOutFile>
+		<TypeScriptOutDir />
+		<TypeScriptGeneratesDeclarations>True</TypeScriptGeneratesDeclarations>
+		<TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+		<TypeScriptSourceMap>True</TypeScriptSourceMap>
+		<TypeScriptMapRoot />
+		<TypeScriptSourceRoot />
+	</PropertyGroup>
+</Project>

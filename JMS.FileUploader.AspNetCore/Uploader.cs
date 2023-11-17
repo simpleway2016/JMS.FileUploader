@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace JMS.FileUploader.AspNetCore
 {
@@ -77,17 +78,25 @@ namespace JMS.FileUploader.AspNetCore
      
        
 
-        internal static UploadingInfo GetUploadingInfo(HttpContext context)
+        internal static UploadingInfo[] GetUploadingInfo(HttpContext context)
         {
-            string fileName = context.Request.Headers["Name"].FirstOrDefault();
             string uploadId = context.Request.Headers["Upload-Id"].FirstOrDefault();
 
-            return _ReceivingDict[$"{fileName},{uploadId}"];
+            return _ReceivingDict.Where(m=>m.Value.TranId == uploadId).Select(m=>m.Value).ToArray();
         }
 
 
         public static async Task HandleUpload(HttpContext context, StringValues filelen)
         {
+            string fileName = HttpUtility.UrlDecode( context.Request.Headers["Name"].FirstOrDefault(), System.Text.Encoding.UTF8);
+            string uploadId = context.Request.Headers["Upload-Id"].FirstOrDefault();
+
+         
+            if (filelen.Count == 0)
+            {
+                await _ReceivingDict[$"{fileName},{uploadId}"].Receive(context, uploadId ,fileName, -1, -1, null,0);
+                return;
+            }
             var arr = filelen.ToString().Split(',');
             var length = long.Parse(arr[0]);
             var position = long.Parse(arr[1]);
@@ -106,10 +115,7 @@ namespace JMS.FileUploader.AspNetCore
                 return;
             }
 
-            string fileName = context.Request.Headers["Name"].FirstOrDefault();
-            string uploadId = context.Request.Headers["Upload-Id"].FirstOrDefault();
-
-            var uploadingInfo = _ReceivingDict.GetOrAdd($"{fileName},{uploadId}", k => new UploadingInfo(fileName, length , context.RequestServices.GetService<IUploadFilter>()));
+            var uploadingInfo = _ReceivingDict.GetOrAdd($"{fileName},{uploadId}", k => new UploadingInfo(fileName,uploadId, length, context.RequestServices.GetService<IUploadFilter>()));
 
             if (uploadingInfo.Completed)
             {
@@ -120,7 +126,7 @@ namespace JMS.FileUploader.AspNetCore
 
             uploadingInfo.Init();
 
-            await uploadingInfo.Receive(context ,fileName, length, position, context.Request.Body , blockSize);
+            await uploadingInfo.Receive(context ,uploadId ,fileName, length, position, context.Request.Body , blockSize);
             await context.Response.WriteAsync("ok");
         }
     }

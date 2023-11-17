@@ -1,18 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using System.Xml.Linq;
-using System;
-using JMS.Token;
+using Microsoft.AspNetCore.Mvc;
 
-namespace WebApplication1.Controllers
+namespace WebApplication2.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
     public class MainController : ControllerBase
     {
-       
-        public MainController( )
-        { 
+
+        public MainController()
+        {
         }
 
         [HttpGet]
@@ -22,7 +18,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
-        public string Test2([FromBody]object body)
+        public string Test2([FromBody] object body)
         {
             var filepath = Request.Headers["FilePath"];
             var filename = Request.Headers["Name"];
