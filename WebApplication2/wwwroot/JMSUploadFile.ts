@@ -36,6 +36,10 @@ export class JmsUploader {
                     }
                 }
                 else if ("size" in arrItem) {
+                    this.allFiles.push(arrItem);//byteLength
+                }
+                else if ("byteLength" in arrItem) {
+                    (<any>arrItem).size = (<any>arrItem).byteLength;
                     this.allFiles.push(arrItem);
                 }
             }
@@ -44,6 +48,11 @@ export class JmsUploader {
         else if ("size" in file) {
             this.allFiles = [file];
             this.totalFilesLength = file.size;
+        }
+        else if ("byteLength" in file) {
+            (<any>file).size = (<any>file).byteLength;
+            this.allFiles = [file];
+            this.totalFilesLength = (<any>file).size;
         }
         else {
             throw "file无法识别";

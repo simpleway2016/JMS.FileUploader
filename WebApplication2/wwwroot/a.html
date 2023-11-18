@@ -23,15 +23,39 @@
 <script lang="ja">
     async function upload() {
         var token = "WyJ7XCJkXCI6XCI2NjY2NjZcIixcImVcIjoxNzMxODk3MDY4fSIsIjYyNzc0RjQ3MDEzRTAyQjQ1RjExN0Y1MjU4NDU4NUNGIl0=";
-        var uploader = new JmsUploader("http://127.0.0.1:8911/UserInfoWebService/userinfo/test2", [document.querySelector("#file").files, document.querySelector("#file2").files], {"Authorization":token}, {
-            name : "abc"
+
+        var data1 = await document.querySelector("#file").files[0].arrayBuffer();
+        var uploader = new JmsUploader("http://127.0.0.1:8911/UserInfoWebService/userinfo/test2", [data1, document.querySelector("#file2").files], { "Authorization": token }, {
+            name: "abc"
         });
         uploader.onUploading = function (percent) {
             document.querySelector("#info").innerHTML = percent + "%";
         };
-  
+
         var ret = await uploader.upload();
         alert(ret);
+    }
+
+    //npm安装组件： jms-uploader
+    //import JmsUploader from "jms-uploader"
+    async function upload2() {
+        var token = "你的token";
+        var pics = [ 正面Blob ,  背面Blob , 手持Blob ]; //上传的3个图片
+        var model = {
+            Name : "姓名",
+            Country:"中国",
+            IdNumber:"2837974938742" //证件号码
+        };
+
+        var uploader = new JmsUploader(`${webApiUrl}/UserInfoWebService/userinfo/SubmitPassport`, pics, { "Authorization": token }, model);
+        uploader.onUploading = function (percent) {
+            //上传进度
+            document.querySelector("#info").innerHTML = percent + "%";
+        };
+
+        var ret = await uploader.upload();
+
+        //上传完毕
     }
 </script>
 </html>
