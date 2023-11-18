@@ -24,7 +24,7 @@ export class JmsUploader {
             for (var i = 0; i < file.length; i++) {
                 this.allFiles[i] = file[i];
             }
-            this.allFiles.forEach(f => this.totalFilesLength += f.size);
+          
         }
         else if (Array.isArray(file)) {
             this.allFiles = [];
@@ -43,7 +43,7 @@ export class JmsUploader {
                     this.allFiles.push(arrItem);
                 }
             }
-            file.forEach(f => this.totalFilesLength += f.size);
+            
         }
         else if ("size" in file) {
             this.allFiles = [file];
@@ -57,6 +57,8 @@ export class JmsUploader {
         else {
             throw "file无法识别";
         }
+
+        this.allFiles.forEach(f => this.totalFilesLength += f.size);
         this.url = url;
 
 
@@ -125,6 +127,10 @@ export class JmsUploader {
 
         this.completed++;
         this.completedSize += uploadedSize;
+        if (this.onUploading) {
+            this.onUploading(parseInt(<any>(this.completedSize * 100 / this.totalFilesLength)));
+        }
+
         if (this.completed == this.maxIndex + 1) {
             this.fileItemIndex++;
 
@@ -137,9 +143,7 @@ export class JmsUploader {
             return;
         }
 
-        if (this.onUploading) {
-            this.onUploading(parseInt(<any>(this.completedSize * 100 / this.totalFilesLength)));
-        }
+       
 
         if (this.currentIndex == this.maxIndex) {
             return;

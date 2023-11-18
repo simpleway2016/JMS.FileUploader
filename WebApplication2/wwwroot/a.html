@@ -15,7 +15,7 @@
 <body>
     <input id="file" multiple type="file" />
     <input id="file2" multiple type="file" />
-    <button onclick="upload()">
+    <button onclick="upload2()">
         upload
     </button>
     <div id="info"></div>
@@ -39,21 +39,26 @@
     //npm安装组件： jms-uploader
     //import JmsUploader from "jms-uploader"
     async function upload2() {
-        var token = "你的token";
-        var pics = [ 正面Blob ,  背面Blob , 手持Blob ]; //上传的3个图片
-        var model = {
-            Name : "姓名",
-            Country:"中国",
-            IdNumber:"2837974938742" //证件号码
+        var token = "WyJ7XCJkXCI6XCI2NjY2NjZcIixcImVcIjoxNzMxODk3MDY4fSIsIjYyNzc0RjQ3MDEzRTAyQjQ1RjExN0Y1MjU4NDU4NUNGIl0=";
+        var pics = [document.querySelector("#file").files ]; //上传的3个图片
+        const model = {
+            Name: 'asdfasdf',
+            Country: "中国",
+            IdNumber: 23452525235 //证件号码
         };
 
-        var uploader = new JmsUploader(`${webApiUrl}/UserInfoWebService/userinfo/SubmitPassport`, pics, { "Authorization": token }, model);
+        var uploader = new JmsUploader(`http://8.222.158.1:11029/UserInfoWebService/userinfo/SubmitPassport`, pics, { "Authorization": token }, model);
         uploader.onUploading = function (percent) {
             //上传进度
             document.querySelector("#info").innerHTML = percent + "%";
         };
 
-        var ret = await uploader.upload();
+        try {
+            var ret = await uploader.upload();
+            alert(ret);
+        } catch (e) {
+            console.error(e);
+        }
 
         //上传完毕
     }
