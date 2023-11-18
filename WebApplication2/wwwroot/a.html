@@ -22,8 +22,8 @@
 </body>
 <script lang="ja">
     async function upload() {
-
-        var uploader = new JmsUploader("Main/Test2", [document.querySelector("#file").files, document.querySelector("#file2").files], null, {
+        var token = "WyJ7XCJkXCI6XCI2NjY2NjZcIixcImVcIjoxNzMxODk3MDY4fSIsIjYyNzc0RjQ3MDEzRTAyQjQ1RjExN0Y1MjU4NDU4NUNGIl0=";
+        var uploader = new JmsUploader("http://127.0.0.1:8911/UserInfoWebService/userinfo/test2", [document.querySelector("#file").files, document.querySelector("#file2").files], {"Authorization":token}, {
             name : "abc"
         });
         uploader.onUploading = function (percent) {

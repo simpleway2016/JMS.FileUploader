@@ -12,6 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="3.7.301" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\JMS.FileUploader.AspNetCore\JMS.FileUploader.AspNetCore.csproj" />
   </ItemGroup>
 

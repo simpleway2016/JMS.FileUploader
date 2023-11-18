@@ -1,10 +1,18 @@
+using Amazon.Runtime;
+using Amazon.S3;
+using Amazon.S3.Model;
 using JMS.FileUploader.AspNetCore;
+using System.Text;
 namespace WebApplication2
 {
     public class Program
     {
+        
+
         public static void Main(string[] args)
         {
+           
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -22,6 +30,8 @@ namespace WebApplication2
             app.MapControllers();
 
             app.Run();
+
+           
         }
     }
 }

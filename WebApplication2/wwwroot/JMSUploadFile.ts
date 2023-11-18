@@ -143,6 +143,9 @@ export class JmsUploader {
     private uploadReject: any = undefined;
     upload = (): Promise<any> => {
         this.file = this.allFiles[this.fileItemIndex];
+        if (!(<any>this.file).name) {
+            (<any>this.file).name = "f" + this.fileItemIndex;
+        }
         this.maxIndex = parseInt(<any>(this.file.size / this.blockSize));
         if (this.file.size % this.blockSize > 0) {
             this.maxIndex++;
