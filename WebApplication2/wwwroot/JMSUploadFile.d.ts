@@ -4,8 +4,8 @@ export declare class JmsUploader {
     jsonObject: any;
     url: string;
     tranId: string;
-    allFiles: Blob[];
-    totalFilesLength: number;
+    private allFiles;
+    private totalFilesLength;
     onUploading: (percent: number) => void;
     private completed;
     private currentIndex;
@@ -15,6 +15,11 @@ export declare class JmsUploader {
     private canceled;
     completedSize: number;
     constructor(url: string, file: File | File[] | FileList, headers: any, jsonObject: any);
+    /**
+     * 设置每小分片的大小，默认100K
+     * @param size
+     */
+    setPartSize(size: number): void;
     private onCompleted;
     private next;
     private uploadResolve;

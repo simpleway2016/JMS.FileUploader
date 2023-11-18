@@ -6,8 +6,8 @@ export class JmsUploader {
     url = "";
     tranId = "";
 
-    allFiles: Blob[];
-    totalFilesLength = 0;
+    private allFiles: Blob[];
+    private totalFilesLength = 0;
 
     onUploading: (percent: number) => void = <any>undefined;
     private completed = 0;
@@ -72,6 +72,14 @@ export class JmsUploader {
         }
 
        
+    }
+
+    /**
+     * 设置每小分片的大小，默认100K
+     * @param size
+     */
+    setPartSize(size: number) {
+        this.blockSize = size;
     }
 
     private onCompleted = async () => {
