@@ -1,6 +1,6 @@
 {
   "name": "jms-uploader",
-  "version": "2.0.6",
+  "version": "2.1.0",
   "description": ".net core断点续传组件",
   "main": "index.js",
   "scripts": {

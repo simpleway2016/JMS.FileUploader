@@ -155,7 +155,7 @@ export class JmsUploader {
         if (this.currentIndex == this.maxIndex) {
             size = this.file.size - this.blockSize * this.maxIndex;
         }
-        new BlockHandler(this, this.currentIndex * this.blockSize, size).upload().then(size => {
+        new BlockHandler(this, this.file, this.fileItemIndex, this.currentIndex * this.blockSize, size).upload().then(size => {
             this.next(size);
         });
     }
@@ -207,7 +207,7 @@ export class JmsUploader {
         if (index == this.maxIndex) {
             size = this.file.size - this.blockSize * this.maxIndex;
         }
-        new BlockHandler(this, index * this.blockSize, size).upload().then(size => {
+        new BlockHandler(this, this.file, this.fileItemIndex, index * this.blockSize, size).upload().then(size => {
             this.next(size);
         }).catch(reason => {
             window.setTimeout(() => this.handleItem(index), 1000);
@@ -219,16 +219,20 @@ class BlockHandler {
     uploader: JmsUploader;
     position = 0;
     size = 0;
-    constructor(uploader: JmsUploader, position: number, size: number) {
+    file: Blob;
+    fileItemIndex: number;
+    constructor(uploader: JmsUploader, file: Blob, fileItemIndex: number, position: number, size: number) {
         this.uploader = uploader;
         this.position = position;
         this.size = size;
+        this.file = file;
+        this.fileItemIndex = fileItemIndex;
     }
 
     upload = (): Promise<number> => {
         return new Promise(async (resolve, reject) => {
             // 创建一个 ArrayBuffer，这里假设您已经有了二进制数据
-            const binaryData = this.uploader.file.slice(this.position, this.position + this.size);
+            const binaryData = this.file.slice(this.position, this.position + this.size);
 
             var headers = <any>{
                 'Content-Type': 'application/json',
@@ -245,14 +249,15 @@ class BlockHandler {
                 }
             }
 
-            headers["Jack-Upload-Length"] = `${this.uploader.file.size},${this.position},${this.size}`;
-            if ((<any>this.uploader.file).name) {
-                headers["Name"] = encodeURIComponent((<any>this.uploader.file).name);
+            headers["Jack-Upload-Length"] = `${this.file.size},${this.position},${this.size}`;
+            if ((<any>this.file).name) {
+                headers["Name"] = encodeURIComponent((<any>this.file).name);
             }
             else {
                 headers["Name"] = "none";
             }
-            
+
+            headers["File-Index"] = this.fileItemIndex;
             headers["Upload-Id"] = this.uploader.tranId;
 
             var ret: Response;

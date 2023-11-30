@@ -30,7 +30,7 @@ namespace JMS.FileUploader.AspNetCore
                     if (o.ToString().Contains(",") == false)
                     {
                         
-                        var uploadingInfos = Uploader.GetUploadingInfo(context);
+                        var uploadingInfos = Uploader.GetUploadingInfo(context).OrderBy(m=>m.FileItemIndex);
                         context.Request.Headers["Name"] = uploadingInfos.Select(m=>m.Name).ToArray();
                         context.Request.Headers.Add("FilePath", uploadingInfos.Select(m => m.FilePath).ToArray());
                         await next();
@@ -69,12 +69,13 @@ namespace JMS.FileUploader.AspNetCore
         /// </summary>
         /// <param name="context"></param>
         /// <param name="fileName"></param>
+        /// <param name="fileItemIndex">同时上传多个文件时，此变量表示文件的排序号</param>
         /// <param name="inputStream"></param>
         /// <param name="fileSize"></param>
         /// <param name="position"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        Task OnReceived(HttpContext context,string uploadId, string fileName, Stream inputStream, long fileSize, long position, int size);
+        Task OnReceived(HttpContext context,string uploadId, string fileName,int fileItemIndex, Stream inputStream, long fileSize, long position, int size);
         Task OnUploadCompleted(HttpContext context, string uploadId, string fileName);
     }
 }

@@ -24,6 +24,9 @@ namespace JMS.FileUploader.AspNetCore
                 return _tempFilePath;
             }
         }
+
+        public int FileItemIndex { get; }
+
         string _tempFilePath;
         FileStream _fileStream;
         internal DateTime _lastReceiveTime = DateTime.Now;
@@ -34,10 +37,11 @@ namespace JMS.FileUploader.AspNetCore
 
         internal const string RootFolder = "./$$JmsUploaderTemps";
 
-        public UploadingInfo(string name, string tranId, long fileLength, IUploadFilter uploadFilter)
+        public UploadingInfo(string name, string tranId,int fileItemIndex, long fileLength, IUploadFilter uploadFilter)
         {
             Name = name;
             TranId = tranId;
+            FileItemIndex = fileItemIndex;
             FileLength = fileLength;
             _uploadFilter = uploadFilter;
         }
@@ -64,14 +68,14 @@ namespace JMS.FileUploader.AspNetCore
             }
         }
 
-        public async Task Receive(HttpContext context, string uploadId, string fileName, long fileSize, long position, Stream stream, int blockSize)
+        public async Task Receive(HttpContext context, string uploadId, string fileName,int fileItemIndex, long fileSize, long position, Stream stream, int blockSize)
         {
             _lastReceiveTime = DateTime.Now;
             if (_uploadFilter != null)
             {
                 if (_positionCaches.TryAdd(position , true))
                 {
-                    await _uploadFilter.OnReceived(context, uploadId, fileName, stream, fileSize, position, blockSize);
+                    await _uploadFilter.OnReceived(context, uploadId, fileName, fileItemIndex, stream, fileSize, position, blockSize);
                     TotalReceived += blockSize;
                     if (TotalReceived >= FileLength)
                     {
