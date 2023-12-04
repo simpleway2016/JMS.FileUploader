@@ -210,7 +210,18 @@ export class JmsUploader {
         new BlockHandler(this, this.file, this.fileItemIndex, index * this.blockSize, size).upload().then(size => {
             this.next(size);
         }).catch(reason => {
-            window.setTimeout(() => this.handleItem(index), 1000);
+            if (reason.statusCode) {
+                if (!this.canceled) {
+                    this.fileItemIndex = 0;
+                    this.canceled = true;
+                    if (this.uploadReject) {
+                        this.uploadReject(reason);
+                    }
+                }
+            }
+            else {
+                window.setTimeout(() => this.handleItem(index), 1000);
+            }
         });
     }
 }
