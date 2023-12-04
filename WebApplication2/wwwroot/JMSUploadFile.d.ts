@@ -6,7 +6,7 @@ export declare class JmsUploader {
     tranId: string;
     private allFiles;
     private totalFilesLength;
-    onUploading: (percent: number) => void;
+    onUploading: (percent: number, uploadedSize: number, totalSize: number) => void;
     private completed;
     private currentIndex;
     private fileItemIndex;

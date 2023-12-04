@@ -9,7 +9,7 @@ export class JmsUploader {
     private allFiles: Blob[];
     private totalFilesLength = 0;
 
-    onUploading: (percent: number) => void = <any>undefined;
+    onUploading: (percent: number, uploadedSize: number,totalSize:number) => void = <any>undefined;
     private completed = 0;
     private currentIndex = 0;
     private fileItemIndex = 0;
@@ -128,7 +128,7 @@ export class JmsUploader {
         this.completed++;
         this.completedSize += uploadedSize;
         if (this.onUploading) {
-            this.onUploading(parseInt(<any>(this.completedSize * 100 / this.totalFilesLength)));
+            this.onUploading(parseInt(<any>(this.completedSize * 100 / this.totalFilesLength)), this.completedSize, this.totalFilesLength);
         }
 
         if (this.completed == this.maxIndex + 1) {
