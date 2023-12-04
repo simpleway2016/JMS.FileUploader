@@ -94,11 +94,6 @@ namespace JMS.FileUploader.AspNetCore
             int.TryParse(context.Request.Headers["File-Index"], out fileItemIndex);
 
 
-            if (filelen.Count == 0)
-            {
-                await _ReceivingDict[$"{fileName},{uploadId}"].Receive(context, uploadId ,fileName, fileItemIndex ,- 1, -1, null,0);
-                return;
-            }
             var arr = filelen.ToString().Split(',');
             var length = long.Parse(arr[0]);
             var position = long.Parse(arr[1]);

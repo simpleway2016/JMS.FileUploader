@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace JMS.FileUploader.AspNetCore
@@ -30,14 +31,15 @@ namespace JMS.FileUploader.AspNetCore
         string _tempFilePath;
         FileStream _fileStream;
         internal DateTime _lastReceiveTime = DateTime.Now;
+        int _lockFlag = 0;
         /// <summary>
         /// 记录已经接收了哪些position
         /// </summary>
-        ConcurrentDictionary<long,bool> _positionCaches = new ConcurrentDictionary<long,bool >();
+        ConcurrentDictionary<long, bool> _positionCaches = new ConcurrentDictionary<long, bool>();
 
         internal const string RootFolder = "./$$JmsUploaderTemps";
 
-        public UploadingInfo(string name, string tranId,int fileItemIndex, long fileLength, IUploadFilter uploadFilter)
+        public UploadingInfo(string name, string tranId, int fileItemIndex, long fileLength, IUploadFilter uploadFilter)
         {
             Name = name;
             TranId = tranId;
@@ -68,15 +70,31 @@ namespace JMS.FileUploader.AspNetCore
             }
         }
 
-        public async Task Receive(HttpContext context, string uploadId, string fileName,int fileItemIndex, long fileSize, long position, Stream stream, int blockSize)
+   
+        public async Task Receive(HttpContext context, string uploadId, string fileName, int fileItemIndex, long fileSize, long position, Stream stream, int blockSize)
         {
             _lastReceiveTime = DateTime.Now;
             if (_uploadFilter != null)
             {
-                if (_positionCaches.TryAdd(position , true))
+                if (_positionCaches.TryAdd(position, true))
                 {
-                    await _uploadFilter.OnReceived(context, uploadId, fileName, fileItemIndex, stream, fileSize, position, blockSize);
-                    TotalReceived += blockSize;
+                    while (true)
+                    {
+                        if (Interlocked.CompareExchange(ref _lockFlag, 1, 0) == 0)
+                        {
+                            await _uploadFilter.OnReceived(context, uploadId, fileName, fileItemIndex, stream, fileSize, position, blockSize);
+                            TotalReceived += blockSize;
+
+                            _lockFlag = 0;
+                            break;
+                        }
+                        else
+                        {
+                            await Task.Delay(10);
+                        }
+                    }
+
+                    
                     if (TotalReceived >= FileLength)
                     {
                         this.Completed = true;
@@ -102,25 +120,41 @@ namespace JMS.FileUploader.AspNetCore
                 blockSize -= readed;
             }
 
- 
-                if (_positionCaches.TryAdd(position, true))
+
+            if (_positionCaches.TryAdd(position, true))
+            {
+
+                while (true)
                 {
-                    _fileStream.Seek(position, SeekOrigin.Begin);
-                    _fileStream.Write(data);
-                    TotalReceived += data.Length;
-                    if (TotalReceived >= FileLength)
+                    if (Interlocked.CompareExchange(ref _lockFlag, 1, 0) == 0)
                     {
-                        _fileStream.Close();
-                        _fileStream.Dispose();
-                        this.Completed = true;
-                        //接收完毕
+                        _fileStream.Seek(position, SeekOrigin.Begin);
+                        _fileStream.Write(data);
+                        TotalReceived += data.Length;
+
+                        _lockFlag = 0;
+                        break;
+                    }
+                    else
+                    {
+                        await Task.Delay(10);
                     }
                 }
-                else
+
+               
+                if (TotalReceived >= FileLength)
                 {
-                    return;
+                    _fileStream.Close();
+                    _fileStream.Dispose();
+                    this.Completed = true;
+                    //接收完毕
                 }
-            
+            }
+            else
+            {
+                return;
+            }
+
 
         }
 
