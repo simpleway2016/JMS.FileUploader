@@ -37,15 +37,21 @@ namespace JMS.FileUploader.AspNetCore
         /// </summary>
         ConcurrentDictionary<long, bool> _positionCaches = new ConcurrentDictionary<long, bool>();
 
-        internal const string RootFolder = "./$$JmsUploaderTemps";
+        internal static string RootFolder;
 
         public FileHandler(string name, string tranId, int fileItemIndex, long fileLength, IUploadFilter uploadFilter)
         {
+            if(RootFolder == null)
+            {
+                RootFolder = AppDomain.CurrentDomain.BaseDirectory + "$$JmsUploaderTemps";
+            }
+
             Name = name;
             TranId = tranId;
             FileItemIndex = fileItemIndex;
             FileLength = fileLength;
             _uploadFilter = uploadFilter;
+
         }
 
 
