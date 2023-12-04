@@ -362,6 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /WebApplication1/temp
+/WebApplication2/$$JmsUploaderTemps
 /WebApplication1/wwwroot/JMSUploadFile.js
 /nodejsModule/JMSUploadFile.js
 /WebApplication2/wwwroot/JMSUploadFile.js
