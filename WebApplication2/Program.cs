@@ -10,7 +10,6 @@ namespace WebApplication2
     {
         public static void Main(string[] args)
         {
-            Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
