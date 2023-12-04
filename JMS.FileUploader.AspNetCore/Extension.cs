@@ -15,7 +15,7 @@ namespace JMS.FileUploader.AspNetCore
     {
         /// <summary>
         /// 使用JmsUploader实现上传功能
-        /// app.UseJmsFileUploader() 应放在 app.UseStaticFiles();等语句的前面
+        /// app.UseJmsFileUploader() 应放在 app.UseAuthorization(); 等身份验证语句的后面
         /// </summary>
         /// <param name="app"></param>
         /// <param name="maxFileSize">最大允许上传的文件大小，默认1g</param>
