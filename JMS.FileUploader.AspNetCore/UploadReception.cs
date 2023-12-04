@@ -12,16 +12,16 @@ using System.Web;
 
 namespace JMS.FileUploader.AspNetCore
 {
-    internal static class Uploader
+    internal static class UploadReception
     {
         internal const int MaxBlockSize = 1024000;
         internal static long MaxFileSize;
-        static ConcurrentDictionary<string, UploadingInfo> _ReceivingDict = new ConcurrentDictionary<string, UploadingInfo>();
-        static Uploader()
+        static ConcurrentDictionary<string, FileHandler> _ReceivingDict = new ConcurrentDictionary<string, FileHandler>();
+        static UploadReception()
         {
             try
             {
-                var files = Directory.GetFiles(UploadingInfo.RootFolder);
+                var files = Directory.GetFiles(FileHandler.RootFolder);
                 foreach (var file in files)
                 {
                     try
@@ -51,7 +51,7 @@ namespace JMS.FileUploader.AspNetCore
                     {
                         if ((DateTime.Now - pair.Value._lastReceiveTime).TotalMinutes > 10)
                         {
-                            if (_ReceivingDict.TryRemove(pair.Key, out UploadingInfo o))
+                            if (_ReceivingDict.TryRemove(pair.Key, out FileHandler o))
                             {
                                 o.Dispose();
                                 try
@@ -78,7 +78,7 @@ namespace JMS.FileUploader.AspNetCore
      
        
 
-        internal static UploadingInfo[] GetUploadingInfo(HttpContext context)
+        internal static FileHandler[] GetUploadingInfo(HttpContext context)
         {
             string uploadId = context.Request.Headers["Upload-Id"].FirstOrDefault();
 
@@ -112,7 +112,7 @@ namespace JMS.FileUploader.AspNetCore
                 return;
             }
 
-            var uploadingInfo = _ReceivingDict.GetOrAdd($"{fileName},{uploadId}", k => new UploadingInfo(fileName,uploadId,fileItemIndex, length, context.RequestServices.GetService<IUploadFilter>()));
+            var uploadingInfo = _ReceivingDict.GetOrAdd($"{fileName},{uploadId}", k => new FileHandler(fileName,uploadId,fileItemIndex, length, context.RequestServices.GetService<IUploadFilter>()));
 
             if (uploadingInfo.Completed)
             {

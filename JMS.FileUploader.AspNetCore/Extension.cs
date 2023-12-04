@@ -22,7 +22,7 @@ namespace JMS.FileUploader.AspNetCore
         /// <returns></returns>
         public static IApplicationBuilder UseJmsFileUploader(this IApplicationBuilder app, long maxFileSize = 1024 * 1024 * 1024)
         {
-            Uploader.MaxFileSize = maxFileSize;
+            UploadReception.MaxFileSize = maxFileSize;
             app.Use(async (context, next) =>
             {
                 if (context.Request.Headers.TryGetValue("Jack-Upload-Length", out StringValues o))
@@ -30,7 +30,7 @@ namespace JMS.FileUploader.AspNetCore
                     if (o.ToString().Contains(",") == false)
                     {
                         
-                        var uploadingInfos = Uploader.GetUploadingInfo(context).OrderBy(m=>m.FileItemIndex);
+                        var uploadingInfos = UploadReception.GetUploadingInfo(context).OrderBy(m=>m.FileItemIndex);
                         context.Request.Headers["Name"] = uploadingInfos.Select(m=>m.Name).ToArray();
                         context.Request.Headers.Add("FilePath", uploadingInfos.Select(m => m.FilePath).ToArray());
                         await next();
@@ -41,7 +41,7 @@ namespace JMS.FileUploader.AspNetCore
                     }
                     else
                     {
-                        await Uploader.HandleUpload(context, o);
+                        await UploadReception.HandleUpload(context, o);
                     }
                 }
                 else

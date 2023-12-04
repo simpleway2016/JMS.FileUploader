@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace JMS.FileUploader.AspNetCore
 {
-    class UploadingInfo : IDisposable
+    class FileHandler : IDisposable
     {
         public string Name;
         public string TranId;
@@ -39,7 +39,7 @@ namespace JMS.FileUploader.AspNetCore
 
         internal const string RootFolder = "./$$JmsUploaderTemps";
 
-        public UploadingInfo(string name, string tranId, int fileItemIndex, long fileLength, IUploadFilter uploadFilter)
+        public FileHandler(string name, string tranId, int fileItemIndex, long fileLength, IUploadFilter uploadFilter)
         {
             Name = name;
             TranId = tranId;
