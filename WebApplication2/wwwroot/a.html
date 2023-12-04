@@ -22,13 +22,11 @@
 </body>
 <script lang="ja">
     async function upload() {
-        var token = "WyJ7XCJkXCI6XCI2NjY2NjZcIixcImVcIjoxNzMxODk3MDY4fSIsIjYyNzc0RjQ3MDEzRTAyQjQ1RjExN0Y1MjU4NDU4NUNGIl0=";
-
- 
-        var uploader = new JmsUploader("http://localhost:5200/main/test2", [document.querySelector("#file1").files, document.querySelector("#file2").files], { "Authorization": token }, {
+      
+        var uploader = new JmsUploader("http://localhost:5200/main/test2", [document.querySelector("#file1").files, document.querySelector("#file2").files], { "Custom-Header": "test" }, {
             name: "abc"
         });
-        uploader.onUploading = function (percent) {
+        uploader.onUploading = function (percent , uploadedSize, totalSize) {
             document.querySelector("#info").innerHTML = percent + "%";
         };
 
