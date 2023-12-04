@@ -10,6 +10,7 @@ namespace WebApplication2
     {
         public static void Main(string[] args)
         {
+            Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -17,7 +18,7 @@ namespace WebApplication2
             builder.Services.AddControllers();
 
             var app = builder.Build();
-            app.UseJmsFileUploader();
+           
             app.UseStaticFiles();
             // Configure the HTTP request pipeline.
 
@@ -26,6 +27,7 @@ namespace WebApplication2
 
             app.MapControllers();
 
+            app.UseJmsFileUploader();
             app.Run();
 
            
