@@ -174,7 +174,10 @@ export class JmsUploader {
         this.maxIndex--;
 
         this.completed = 0;
-        this.completedSize = 0;
+
+        if (this.fileItemIndex == 0) {
+            this.completedSize = 0;
+        }
 
         if (this.fileItemIndex == 0) {
             this.tranId = uuidv4();

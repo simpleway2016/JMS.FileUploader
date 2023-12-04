@@ -26,8 +26,11 @@
         var uploader = new JmsUploader("http://localhost:5200/main/test2", [document.querySelector("#file1").files, document.querySelector("#file2").files], { "Custom-Header": "test" }, {
             name: "abc"
         });
-        uploader.onUploading = function (percent , uploadedSize, totalSize) {
-            document.querySelector("#info").innerHTML = percent + "%";
+
+        //uploader.setPartSize(1024);//设置分块大小，默认是102400
+
+        uploader.onUploading = function (percent, uploadedSize, totalSize) {
+            document.querySelector("#info").innerHTML = percent + "% " + uploadedSize + "," + totalSize;
         };
 
         var ret = await uploader.upload();
