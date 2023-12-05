@@ -22,12 +22,19 @@
 </body>
 <script lang="ja">
     async function upload() {
-      
-        var uploader = new JmsUploader("http://localhost:5200/main/test2", [document.querySelector("#file1").files, document.querySelector("#file2").files], { "Custom-Header": "test" }, {
-            name: "abc"
-        });
+        //自定义请求头
+        var headers = function () {
+            return { "Custom-Header": "test" };
+        };
 
-        //uploader.setPartSize(1024);//设置分块大小，默认是102400
+        //提交的body
+        var dataBody = {
+            name: "abc"
+        };
+
+        var uploader = new JmsUploader("http://localhost:5200/main/test", [document.querySelector("#file1").files, document.querySelector("#file2").files], headers, dataBody);
+
+        uploader.setPartSize(1024);//设置分块大小，默认是102400
 
         uploader.onUploading = function (percent, uploadedSize, totalSize) {
             document.querySelector("#info").innerHTML = percent + "% " + uploadedSize + "," + totalSize;
