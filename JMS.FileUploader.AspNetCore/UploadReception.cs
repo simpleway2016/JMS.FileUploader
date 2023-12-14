@@ -82,7 +82,7 @@ namespace JMS.FileUploader.AspNetCore
         {
             string uploadId = context.Request.Headers["Upload-Id"].FirstOrDefault();
 
-            return _ReceivingDict.Where(m=>m.Value.TranId == uploadId).Select(m=>m.Value).ToArray();
+            return _ReceivingDict.Where(m=>m.Value.UploadId == uploadId).Select(m=>m.Value).ToArray();
         }
 
 
@@ -121,7 +121,7 @@ namespace JMS.FileUploader.AspNetCore
                 return;
             }
 
-            uploadingInfo.Init();
+            await uploadingInfo.Init(context, uploadId, fileName);
 
             await uploadingInfo.Receive(context ,uploadId ,fileName, fileItemIndex,length, position, context.Request.Body , blockSize);
             await context.Response.WriteAsync("ok");

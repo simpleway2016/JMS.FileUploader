@@ -62,8 +62,10 @@ namespace JMS.FileUploader.AspNetCore
         }
     }
 
-    public interface IUploadFilter
+    public interface IUploadFilter  
     {
+        void OnUploadError(string uploadId, string fileName);
+        Task OnUploadBeginAsync(HttpContext context, string uploadId, string fileName);
         /// <summary>
         /// 收到上传的文件数据
         /// </summary>
@@ -75,7 +77,7 @@ namespace JMS.FileUploader.AspNetCore
         /// <param name="position"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        Task OnReceived(HttpContext context,string uploadId, string fileName,int fileItemIndex, Stream inputStream, long fileSize, long position, int size);
-        Task OnUploadCompleted(HttpContext context, string uploadId, string fileName);
+        Task OnReceivedAsync(HttpContext context,string uploadId, string fileName,int fileItemIndex, Stream inputStream, long fileSize, long position, int size);
+        Task OnUploadCompletedAsync(HttpContext context, string uploadId, string fileName);
     }
 }

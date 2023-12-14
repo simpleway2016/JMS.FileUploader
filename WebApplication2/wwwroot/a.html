@@ -34,7 +34,7 @@
 
         var uploader = new JmsUploader("http://localhost:5200/main/test", [document.querySelector("#file1").files, document.querySelector("#file2").files], headers, dataBody);
 
-        uploader.setPartSize(1024);//设置分块大小，默认是102400
+        uploader.setPartSize(102400);//设置分块大小，默认是102400
 
         uploader.onUploading = function (percent, uploadedSize, totalSize) {
             document.querySelector("#info").innerHTML = percent + "% " + uploadedSize + "," + totalSize;

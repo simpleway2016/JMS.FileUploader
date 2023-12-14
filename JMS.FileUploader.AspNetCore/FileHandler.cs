@@ -12,10 +12,10 @@ namespace JMS.FileUploader.AspNetCore
     class FileHandler : IDisposable
     {
         public string Name;
-        public string TranId;
+        public string UploadId;
         public int TotalReceived;
         public long FileLength;
-        private readonly IUploadFilter _uploadFilter;
+        private IUploadFilter _uploadFilter;
         public bool Completed;
 
         public string FilePath
@@ -32,14 +32,15 @@ namespace JMS.FileUploader.AspNetCore
         FileStream _fileStream;
         internal DateTime _lastReceiveTime = DateTime.Now;
         int _lockFlag = 0;
+        int _initFlag = 0;
         /// <summary>
         /// 记录已经接收了哪些position
         /// </summary>
         ConcurrentDictionary<long, bool> _positionCaches = new ConcurrentDictionary<long, bool>();
 
         internal static string RootFolder;
-
-        public FileHandler(string name, string tranId, int fileItemIndex, long fileLength, IUploadFilter uploadFilter)
+        bool _inited = false;
+        public FileHandler(string name, string uploadId, int fileItemIndex, long fileLength, IUploadFilter uploadFilter)
         {
             if(RootFolder == null)
             {
@@ -47,7 +48,7 @@ namespace JMS.FileUploader.AspNetCore
             }
 
             Name = name;
-            TranId = tranId;
+            UploadId = uploadId;
             FileItemIndex = fileItemIndex;
             FileLength = fileLength;
             _uploadFilter = uploadFilter;
@@ -56,22 +57,44 @@ namespace JMS.FileUploader.AspNetCore
 
 
 
-        public void Init()
+        public async ValueTask Init(HttpContext context, string uploadId, string fileName)
         {
-            if (_fileStream != null)
+            if (_initFlag == 2)
                 return;
 
-            lock (this)
+            if (Interlocked.CompareExchange(ref _initFlag, 1, 0) == 0)
             {
-                if (_fileStream == null)
+                try
                 {
-                    if (Directory.Exists(RootFolder) == false)
+                    if (_fileStream == null && _uploadFilter == null)
                     {
-                        Directory.CreateDirectory(RootFolder);
-                    }
+                        if (Directory.Exists(RootFolder) == false)
+                        {
+                            Directory.CreateDirectory(RootFolder);
+                        }
 
-                    _tempFilePath = Path.Combine(RootFolder, Guid.NewGuid().ToString("N"));
-                    _fileStream = File.Create(_tempFilePath);
+                        _tempFilePath = Path.Combine(RootFolder, Guid.NewGuid().ToString("N"));
+                        _fileStream = File.Create(_tempFilePath);
+                    }
+                    else if (_uploadFilter != null)
+                    {
+                        await _uploadFilter.OnUploadBeginAsync(context, uploadId, fileName);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    throw;
+                }
+                finally
+                {
+                    _initFlag = 2;
+                }
+            }
+            else
+            {
+                while(_initFlag != 2)
+                {
+                    await Task.Delay(10);
                 }
             }
         }
@@ -88,7 +111,7 @@ namespace JMS.FileUploader.AspNetCore
                     {
                         if (Interlocked.CompareExchange(ref _lockFlag, 1, 0) == 0)
                         {
-                            await _uploadFilter.OnReceived(context, uploadId, fileName, fileItemIndex, stream, fileSize, position, blockSize);
+                            await _uploadFilter.OnReceivedAsync(context, uploadId, fileName, fileItemIndex, stream, fileSize, position, blockSize);
                             TotalReceived += blockSize;
 
                             _lockFlag = 0;
@@ -105,7 +128,7 @@ namespace JMS.FileUploader.AspNetCore
                     {
                         this.Completed = true;
                         //接收完毕
-                        await _uploadFilter.OnUploadCompleted(context, uploadId, fileName);
+                        await _uploadFilter.OnUploadCompletedAsync(context, uploadId, fileName);
                     }
                 }
                 return;
@@ -171,11 +194,18 @@ namespace JMS.FileUploader.AspNetCore
 
         public void Dispose()
         {
-
+            _positionCaches.Clear();
             if (_fileStream != null)
             {
                 _fileStream.Dispose();
                 _fileStream = null;
+
+            }
+
+            if (_uploadFilter != null && !this.Completed)
+            {
+                _uploadFilter.OnUploadError(UploadId , this.Name);
+                _uploadFilter = null;
 
             }
         }
