@@ -9,28 +9,23 @@ namespace WebApplication2
     [UploadFilterDescription("Aliyun")]
     public class AliyunUploadFilter : IUploadFilter
     {
-        
-        string _uploadId;
+        const string BucketName = "domainconfig";
 
+        string _uploadId;
         string _ossUploadId;
-        string bucketName = "domainconfig";
-        string _key;
+        
+        string _objectKey;
         OssClient _ossClient;
         public async Task OnUploadBeginAsync(HttpContext context, string uploadId, string fileName, long fileSize, int fileItemIndex)
         {
             _uploadId = uploadId;
 
-            _key = $"domain/a{fileItemIndex}.zip";
+            _objectKey = $"domain/a{fileItemIndex}.zip";
             var content = File.ReadAllText("a.txt").FromJson<Info>();
 
             _ossClient = new OssClient(content.Url, content.Key, content.Id);
 
-            //var ret2 = uploadingOss.Client.GetObject(bucketName, key);
-            //var filedata = new byte[ret2.ContentLength];
-            //await ret2.Content.ReadAsync(filedata, 0, filedata.Length);
-            //File.WriteAllBytes("d:\\b.zip", filedata);
-
-            var ret = _ossClient.InitiateMultipartUpload(new InitiateMultipartUploadRequest(bucketName, _key));
+            var ret = _ossClient.InitiateMultipartUpload(new InitiateMultipartUploadRequest(BucketName, _objectKey));
             if (ret.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 throw new Exception(ret.HttpStatusCode.ToString());
 
@@ -47,7 +42,7 @@ namespace WebApplication2
 
          
             var num = (int)(position / 102400) + 1;
-            var ret = _ossClient.UploadPart(new UploadPartRequest(bucketName, _key, _ossUploadId) { 
+            var ret = _ossClient.UploadPart(new UploadPartRequest(BucketName, _objectKey, _ossUploadId) { 
                 InputStream = ms,
                 
                 PartSize = size,
@@ -64,11 +59,11 @@ namespace WebApplication2
 
 
             // 列出所有分块。
-            var listPartsRequest = new ListPartsRequest(bucketName, _key, _ossUploadId);
+            var listPartsRequest = new ListPartsRequest(BucketName, _objectKey, _ossUploadId);
             var partList = _ossClient.ListParts(listPartsRequest);
 
             // 创建CompleteMultipartUploadRequest对象。
-            var completeRequest = new CompleteMultipartUploadRequest(bucketName, _key, _ossUploadId);
+            var completeRequest = new CompleteMultipartUploadRequest(BucketName, _objectKey, _ossUploadId);
 
             // 设置分块列表。
             foreach (var part in partList.Parts)
@@ -84,7 +79,7 @@ namespace WebApplication2
                 throw new Exception(ret.HttpStatusCode.ToString());
 
             //设置访问权限
-            _ossClient.SetObjectAcl(bucketName, _key, CannedAccessControlList.PublicRead);
+            _ossClient.SetObjectAcl(BucketName, _objectKey, CannedAccessControlList.PublicRead);
 
             //获得下载的url路径
             var downloadUrl = ret.Location;
