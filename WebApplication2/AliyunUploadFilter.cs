@@ -92,11 +92,6 @@ namespace WebApplication2
 
     }
 
-    class UploadingOss
-    {
-        public OssClient Client { get; set; }
-        public string UploadId { get; set; }
-    }
 
     class Info
     {
