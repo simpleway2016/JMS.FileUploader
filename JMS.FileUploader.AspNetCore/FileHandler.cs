@@ -139,7 +139,7 @@ namespace JMS.FileUploader.AspNetCore
                     {
                         this.Completed = true;
                         //接收完毕
-                        await _uploadFilter.OnUploadCompletedAsync(context);
+                        _tempFilePath = await _uploadFilter.OnUploadCompletedAsync(context);
                     }
                 }
                 return;

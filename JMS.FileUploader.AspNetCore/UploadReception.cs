@@ -14,9 +14,12 @@ namespace JMS.FileUploader.AspNetCore
 {
     internal static class UploadReception
     {
+        internal static ConcurrentDictionary<string, Type> Filters = new ConcurrentDictionary<string, Type>();
+
         internal const int MaxBlockSize = 1024000;
         internal static long MaxFileSize;
         static ConcurrentDictionary<string, FileHandler> _ReceivingDict = new ConcurrentDictionary<string, FileHandler>();
+
         static UploadReception()
         {
             try
@@ -75,20 +78,36 @@ namespace JMS.FileUploader.AspNetCore
                 }
             }
         }
-     
-       
+
+        static IUploadFilter getUploadFilter(HttpContext httpContext)
+        {
+            if (Filters.Count == 0)
+                return null;
+
+            var desc = httpContext.Request.Headers["Upload-Filter"].ToString();
+            if (string.IsNullOrWhiteSpace(desc))
+                desc = "";
+
+            if (Filters.TryGetValue(desc, out Type type))
+            {
+                return (IUploadFilter)httpContext.RequestServices.GetService(type);
+            }
+
+            return null;
+        }
+
 
         internal static FileHandler[] GetUploadingInfo(HttpContext context)
         {
             string uploadId = context.Request.Headers["Upload-Id"].FirstOrDefault();
 
-            return _ReceivingDict.Where(m=>m.Value.UploadId == uploadId).Select(m=>m.Value).ToArray();
+            return _ReceivingDict.Where(m => m.Value.UploadId == uploadId).Select(m => m.Value).ToArray();
         }
 
 
         public static async Task HandleUpload(HttpContext context, StringValues filelen)
         {
-            string fileName = HttpUtility.UrlDecode( context.Request.Headers["Name"].FirstOrDefault(), System.Text.Encoding.UTF8);
+            string fileName = HttpUtility.UrlDecode(context.Request.Headers["Name"].FirstOrDefault(), System.Text.Encoding.UTF8);
             string uploadId = context.Request.Headers["Upload-Id"].FirstOrDefault();
             int fileItemIndex = 0;
             int.TryParse(context.Request.Headers["File-Index"], out fileItemIndex);
@@ -112,7 +131,7 @@ namespace JMS.FileUploader.AspNetCore
                 return;
             }
 
-            var uploadingInfo = _ReceivingDict.GetOrAdd($"{fileName},{uploadId},{fileItemIndex}", k => new FileHandler(fileName,uploadId,fileItemIndex, length, context.RequestServices.GetService<IUploadFilter>()));
+            var uploadingInfo = _ReceivingDict.GetOrAdd($"{fileName},{uploadId},{fileItemIndex}", k => new FileHandler(fileName, uploadId, fileItemIndex, length, getUploadFilter(context)));
 
             if (uploadingInfo.Completed)
             {
@@ -121,14 +140,14 @@ namespace JMS.FileUploader.AspNetCore
                 return;
             }
 
-            await uploadingInfo.Init(context, uploadId, fileName , length, fileItemIndex);
+            await uploadingInfo.Init(context, uploadId, fileName, length, fileItemIndex);
 
-            await uploadingInfo.Receive(context ,uploadId ,fileName, fileItemIndex,length, position, context.Request.Body , blockSize);
+            await uploadingInfo.Receive(context, uploadId, fileName, fileItemIndex, length, position, context.Request.Body, blockSize);
             await context.Response.WriteAsync("ok");
         }
     }
 
-   
 
-   
+
+
 }

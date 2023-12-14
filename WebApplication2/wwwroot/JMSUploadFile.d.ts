@@ -4,6 +4,7 @@ export declare class JmsUploader {
     jsonObject: any;
     url: string;
     tranId: string;
+    uploadFilter: string;
     private allFiles;
     private totalFilesLength;
     onUploading: (percent: number, uploadedSize: number, totalSize: number) => void;
@@ -20,6 +21,7 @@ export declare class JmsUploader {
      * @param size
      */
     setPartSize(size: number): void;
+    setUploadFilter(filter: string): void;
     private onCompleted;
     private next;
     private uploadResolve;

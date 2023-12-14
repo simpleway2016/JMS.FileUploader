@@ -5,6 +5,7 @@ export class JmsUploader {
     jsonObject: any = undefined;
     url = "";
     tranId = "";
+    uploadFilter = "";
 
     private allFiles: Blob[];
     private totalFilesLength = 0;
@@ -82,6 +83,10 @@ export class JmsUploader {
      */
     setPartSize(size: number) {
         this.blockSize = size;
+    }
+
+    setUploadFilter(filter: string) {
+        this.uploadFilter = filter;
     }
 
     private onCompleted = async () => {
@@ -262,7 +267,9 @@ class BlockHandler {
                     headers[p] = curHeaders[p];
                 }
             }
-
+            if (this.uploader.uploadFilter) {
+                headers["Upload-Filter"] = this.uploader.uploadFilter;
+            }
             headers["Jack-Upload-Length"] = `${this.file.size},${this.position},${this.size}`;
             if ((<any>this.file).name) {
                 headers["Name"] = encodeURIComponent((<any>this.file).name);

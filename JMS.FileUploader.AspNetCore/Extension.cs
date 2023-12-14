@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -58,32 +59,21 @@ namespace JMS.FileUploader.AspNetCore
         /// <returns></returns>
         public static IServiceCollection AddFileUploadFilter<T>(this IServiceCollection services) where T : IUploadFilter
         {
-            return services.AddTransient(typeof(IUploadFilter), typeof(T));
+            var type = typeof(T);
+            var attr = type.GetCustomAttribute<UploadFilterDescriptionAttribute>();
+            if(attr == null || string.IsNullOrWhiteSpace(attr.Description))
+            {
+                UploadReception.Filters[""] = type;
+            }
+            else
+            {
+                UploadReception.Filters[attr.Description.Trim()] = type;
+            }
+
+            services.AddSingleton(type);
+            return services;
         }
     }
 
-    public interface IUploadFilter  
-    {
-        void OnUploadError();
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="uploadId"></param>
-        /// <param name="fileName"></param>
-        /// <param name="fileSize"></param>
-        /// <param name="fileItemIndex">同时上传多个文件时，此变量表示文件的排序号</param>
-        /// <returns></returns>
-        Task OnUploadBeginAsync(HttpContext context, string uploadId, string fileName, long fileSize, int fileItemIndex);
-        /// <summary>
-        /// 收到上传的文件数据
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="inputStream"></param>
-        /// <param name="position"></param>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        Task OnReceivedAsync(HttpContext context, Stream inputStream, long position, int size);
-        Task OnUploadCompletedAsync(HttpContext context);
-    }
+   
 }

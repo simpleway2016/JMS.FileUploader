@@ -17,7 +17,7 @@ namespace WebApplication2.Controllers
 
             //ÎÄ¼şÃû
             var filename = Request.Headers["Name"];
-            return filename + "\r\n" + customHeader;
+            return filepath + "\r\n" + filename + "\r\n" + customHeader;
         }
     }
 }
