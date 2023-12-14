@@ -81,11 +81,8 @@ namespace WebApplication2
             //设置访问权限
             _ossClient.SetObjectAcl(BucketName, _objectKey, CannedAccessControlList.PublicRead);
 
-            //获得下载的url路径
-            var downloadUrl = ret.Location;
-
-
-            return downloadUrl;
+            //返回下载的url路径
+            return ret.Location;
         }
 
         public void OnUploadError()
