@@ -58,26 +58,32 @@ namespace JMS.FileUploader.AspNetCore
         /// <returns></returns>
         public static IServiceCollection AddFileUploadFilter<T>(this IServiceCollection services) where T : IUploadFilter
         {
-            return services.AddSingleton(typeof(IUploadFilter), typeof(T));
+            return services.AddTransient(typeof(IUploadFilter), typeof(T));
         }
     }
 
     public interface IUploadFilter  
     {
-        void OnUploadError(string uploadId, string fileName);
-        Task OnUploadBeginAsync(HttpContext context, string uploadId, string fileName);
+        void OnUploadError();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="uploadId"></param>
+        /// <param name="fileName"></param>
+        /// <param name="fileSize"></param>
+        /// <param name="fileItemIndex">同时上传多个文件时，此变量表示文件的排序号</param>
+        /// <returns></returns>
+        Task OnUploadBeginAsync(HttpContext context, string uploadId, string fileName, long fileSize, int fileItemIndex);
         /// <summary>
         /// 收到上传的文件数据
         /// </summary>
         /// <param name="context"></param>
-        /// <param name="fileName"></param>
-        /// <param name="fileItemIndex">同时上传多个文件时，此变量表示文件的排序号</param>
         /// <param name="inputStream"></param>
-        /// <param name="fileSize"></param>
         /// <param name="position"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        Task OnReceivedAsync(HttpContext context,string uploadId, string fileName,int fileItemIndex, Stream inputStream, long fileSize, long position, int size);
-        Task OnUploadCompletedAsync(HttpContext context, string uploadId, string fileName);
+        Task OnReceivedAsync(HttpContext context, Stream inputStream, long position, int size);
+        Task OnUploadCompletedAsync(HttpContext context);
     }
 }

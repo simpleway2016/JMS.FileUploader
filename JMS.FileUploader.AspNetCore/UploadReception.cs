@@ -112,7 +112,7 @@ namespace JMS.FileUploader.AspNetCore
                 return;
             }
 
-            var uploadingInfo = _ReceivingDict.GetOrAdd($"{fileName},{uploadId}", k => new FileHandler(fileName,uploadId,fileItemIndex, length, context.RequestServices.GetService<IUploadFilter>()));
+            var uploadingInfo = _ReceivingDict.GetOrAdd($"{fileName},{uploadId},{fileItemIndex}", k => new FileHandler(fileName,uploadId,fileItemIndex, length, context.RequestServices.GetService<IUploadFilter>()));
 
             if (uploadingInfo.Completed)
             {
@@ -121,7 +121,7 @@ namespace JMS.FileUploader.AspNetCore
                 return;
             }
 
-            await uploadingInfo.Init(context, uploadId, fileName);
+            await uploadingInfo.Init(context, uploadId, fileName , length, fileItemIndex);
 
             await uploadingInfo.Receive(context ,uploadId ,fileName, fileItemIndex,length, position, context.Request.Body , blockSize);
             await context.Response.WriteAsync("ok");

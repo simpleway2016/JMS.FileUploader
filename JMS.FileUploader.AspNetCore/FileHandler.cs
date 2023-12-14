@@ -57,7 +57,7 @@ namespace JMS.FileUploader.AspNetCore
 
 
 
-        public async ValueTask Init(HttpContext context, string uploadId, string fileName)
+        public async ValueTask Init(HttpContext context, string uploadId, string fileName,long fileSize,int fileItemIndex)
         {
             if (_initFlag == 2)
                 return;
@@ -78,7 +78,7 @@ namespace JMS.FileUploader.AspNetCore
                     }
                     else if (_uploadFilter != null)
                     {
-                        await _uploadFilter.OnUploadBeginAsync(context, uploadId, fileName);
+                        await _uploadFilter.OnUploadBeginAsync(context, uploadId, fileName , fileSize , fileItemIndex);
                     }
                 }
                 catch(Exception ex)
@@ -111,10 +111,21 @@ namespace JMS.FileUploader.AspNetCore
                     {
                         if (Interlocked.CompareExchange(ref _lockFlag, 1, 0) == 0)
                         {
-                            await _uploadFilter.OnReceivedAsync(context, uploadId, fileName, fileItemIndex, stream, fileSize, position, blockSize);
-                            TotalReceived += blockSize;
-
-                            _lockFlag = 0;
+                            try
+                            {
+                                await _uploadFilter.OnReceivedAsync(context,stream,  position, blockSize);
+                                TotalReceived += blockSize;
+                            }
+                            catch (Exception)
+                            {
+                                _positionCaches.Remove(position,out _);
+                                throw;
+                            }
+                            finally
+                            {
+                                _lockFlag = 0;
+                            }
+                           
                             break;
                         }
                         else
@@ -128,7 +139,7 @@ namespace JMS.FileUploader.AspNetCore
                     {
                         this.Completed = true;
                         //接收完毕
-                        await _uploadFilter.OnUploadCompletedAsync(context, uploadId, fileName);
+                        await _uploadFilter.OnUploadCompletedAsync(context);
                     }
                 }
                 return;
@@ -157,11 +168,23 @@ namespace JMS.FileUploader.AspNetCore
                 {
                     if (Interlocked.CompareExchange(ref _lockFlag, 1, 0) == 0)
                     {
-                        _fileStream.Seek(position, SeekOrigin.Begin);
-                        _fileStream.Write(data);
-                        TotalReceived += data.Length;
+                        try
+                        {
+                            _fileStream.Seek(position, SeekOrigin.Begin);
+                            _fileStream.Write(data);
 
-                        _lockFlag = 0;
+                            TotalReceived += data.Length;
+                        }
+                        catch (Exception)
+                        {
+                            _positionCaches.Remove(position, out _);
+                            throw;
+                        }
+                        finally
+                        {
+                            _lockFlag = 0;
+                        }
+                       
                         break;
                     }
                     else
@@ -204,7 +227,7 @@ namespace JMS.FileUploader.AspNetCore
 
             if (_uploadFilter != null && !this.Completed)
             {
-                _uploadFilter.OnUploadError(UploadId , this.Name);
+                _uploadFilter.OnUploadError();
                 _uploadFilter = null;
 
             }
