@@ -68,8 +68,12 @@
             document.querySelector("#info").innerHTML = percent + "% " + uploadedSize + "," + totalSize;
         };
 
-        var ret = await uploader.upload();
-        alert(ret);
+        try {
+            var ret = await uploader.upload();
+            alert(ret);
+        } catch (e) {
+            alert("错误：" + JSON.stringify(e));
+        }
     }
 </script>
 </html>

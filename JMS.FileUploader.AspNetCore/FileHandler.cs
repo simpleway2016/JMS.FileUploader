@@ -78,12 +78,8 @@ namespace JMS.FileUploader.AspNetCore
                     }
                     else if (_uploadFilter != null)
                     {
-                        await _uploadFilter.OnUploadBeginAsync(context, uploadId, fileName , fileSize , fileItemIndex);
+                        await _uploadFilter.OnUploadBeginAsync(context, uploadId, fileName, fileSize, fileItemIndex);
                     }
-                }
-                catch(Exception ex)
-                {
-                    throw;
                 }
                 finally
                 {
@@ -116,10 +112,10 @@ namespace JMS.FileUploader.AspNetCore
                                 await _uploadFilter.OnReceivedAsync(context,stream,  position, blockSize);
                                 TotalReceived += blockSize;
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
                                 _positionCaches.Remove(position,out _);
-                                throw;
+                                throw new UploadFilterException(ex);
                             }
                             finally
                             {

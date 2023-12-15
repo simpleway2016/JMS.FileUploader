@@ -107,43 +107,58 @@ namespace JMS.FileUploader.AspNetCore
 
         public static async Task HandleUpload(HttpContext context, StringValues filelen)
         {
-            string fileName = HttpUtility.UrlDecode(context.Request.Headers["Name"].FirstOrDefault(), System.Text.Encoding.UTF8);
-            string uploadId = context.Request.Headers["Upload-Id"].FirstOrDefault();
-            int fileItemIndex = 0;
-            int.TryParse(context.Request.Headers["File-Index"], out fileItemIndex);
+            
+
+            try
+            {
+                string fileName = HttpUtility.UrlDecode(context.Request.Headers["Name"].FirstOrDefault(), System.Text.Encoding.UTF8);
+                string uploadId = context.Request.Headers["Upload-Id"].FirstOrDefault();
+                int fileItemIndex = 0;
+                int.TryParse(context.Request.Headers["File-Index"], out fileItemIndex);
 
 
-            var arr = filelen.ToString().Split(',');
-            var length = long.Parse(arr[0]);
-            var position = long.Parse(arr[1]);
-            var blockSize = int.Parse(arr[2]);
+                var arr = filelen.ToString().Split(',');
+                var length = long.Parse(arr[0]);
+                var position = long.Parse(arr[1]);
+                var blockSize = int.Parse(arr[2]);
 
-            if (blockSize > MaxBlockSize || context.Request.ContentLength > MaxBlockSize || context.Request.ContentLength == null)
+                if (blockSize > MaxBlockSize || context.Request.ContentLength > MaxBlockSize || context.Request.ContentLength == null)
+                {
+                    context.Response.StatusCode = 500;
+                    await context.Response.WriteAsync("文件大小不正确");
+                    return;
+                }
+                if (length > MaxFileSize)
+                {
+                    context.Response.StatusCode = 500;
+                    await context.Response.WriteAsync("文件大小超出限制");
+                    return;
+                }
+
+                var uploadingInfo = _ReceivingDict.GetOrAdd($"{fileName},{uploadId},{fileItemIndex}", k => new FileHandler(fileName, uploadId, fileItemIndex, length, getUploadFilter(context)));
+
+                if (uploadingInfo.Completed)
+                {
+                    context.Response.StatusCode = 500;
+                    await context.Response.WriteAsync("无效的文件块");
+                    return;
+                }
+
+                await uploadingInfo.Init(context, uploadId, fileName, length, fileItemIndex);
+
+                await uploadingInfo.Receive(context, uploadId, fileName, fileItemIndex, length, position, context.Request.Body, blockSize);
+                await context.Response.WriteAsync("ok");
+            }
+            catch(UploadFilterException ex)
+            {
+                context.Response.StatusCode = 503;
+                await context.Response.WriteAsync(ex.InnerException.Message);
+            }
+            catch (Exception ex)
             {
                 context.Response.StatusCode = 500;
-                await context.Response.WriteAsync("文件大小不正确");
-                return;
+                await context.Response.WriteAsync(ex.Message);
             }
-            if (length > MaxFileSize)
-            {
-                context.Response.StatusCode = 500;
-                await context.Response.WriteAsync("文件大小超出限制");
-                return;
-            }
-
-            var uploadingInfo = _ReceivingDict.GetOrAdd($"{fileName},{uploadId},{fileItemIndex}", k => new FileHandler(fileName, uploadId, fileItemIndex, length, getUploadFilter(context)));
-
-            if (uploadingInfo.Completed)
-            {
-                context.Response.StatusCode = 500;
-                await context.Response.WriteAsync("无效的文件块");
-                return;
-            }
-
-            await uploadingInfo.Init(context, uploadId, fileName, length, fileItemIndex);
-
-            await uploadingInfo.Receive(context, uploadId, fileName, fileItemIndex, length, position, context.Request.Body, blockSize);
-            await context.Response.WriteAsync("ok");
         }
     }
 

@@ -223,7 +223,7 @@ export class JmsUploader {
                     this.fileItemIndex = 0;
                     this.canceled = true;
                     if (this.uploadReject) {
-                        this.uploadReject(reason);
+                        this.uploadReject(reason.error);
                     }
                 }
             }
@@ -294,11 +294,11 @@ class BlockHandler {
             }
 
             var text = await ret.text();
-            if (ret.status >= 300 || ret.status < 200) {
-                if (text)
-                    reject(text);
-                else
-                    reject({ statusCode: ret.status });
+            if (ret.status == 503) {
+                reject(text);
+            }
+            else if (ret.status >= 300 || ret.status < 200) {
+                reject({ statusCode: ret.status , error : text });
             }
             else if (text == "ok") {
 

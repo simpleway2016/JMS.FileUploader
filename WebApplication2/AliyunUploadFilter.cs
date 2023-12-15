@@ -57,32 +57,49 @@ namespace WebApplication2
         public async Task<string> OnUploadCompletedAsync(HttpContext context)
         {
 
-
-            // 列出所有分块。
-            var listPartsRequest = new ListPartsRequest(BucketName, _objectKey, _ossUploadId);
-            var partList = _ossClient.ListParts(listPartsRequest);
-
-            // 创建CompleteMultipartUploadRequest对象。
-            var completeRequest = new CompleteMultipartUploadRequest(BucketName, _objectKey, _ossUploadId);
-
-            // 设置分块列表。
-            foreach (var part in partList.Parts)
+            for (int i = 0; i < 3; i++) // 如果发生错误，最多尝试3次
             {
-                completeRequest.PartETags.Add(new PartETag(part.PartNumber, part.ETag));
+                try
+                {
+                    // 列出所有分块。
+                    var listPartsRequest = new ListPartsRequest(BucketName, _objectKey, _ossUploadId);
+                    var partList = _ossClient.ListParts(listPartsRequest);
+
+                    // 创建CompleteMultipartUploadRequest对象。
+                    var completeRequest = new CompleteMultipartUploadRequest(BucketName, _objectKey, _ossUploadId);
+
+                    // 设置分块列表。
+                    foreach (var part in partList.Parts)
+                    {
+                        completeRequest.PartETags.Add(new PartETag(part.PartNumber, part.ETag));
+                    }
+
+                    // 完成上传。
+                    var ret = _ossClient.CompleteMultipartUpload(completeRequest);
+
+
+                    if (ret.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                        throw new Exception(ret.HttpStatusCode.ToString());
+
+                    //设置访问权限
+                    _ossClient.SetObjectAcl(BucketName, _objectKey, CannedAccessControlList.PublicRead);
+
+                    //返回下载的url路径
+                    return ret.Location;
+                }
+                catch (Exception)
+                {
+                    if (i == 2)
+                    {
+                        throw;
+                    }
+                    else
+                    {
+                        Thread.Sleep(3000);
+                    }
+                }
             }
-
-            // 完成上传。
-            var ret = _ossClient.CompleteMultipartUpload(completeRequest);
-
-           
-            if (ret.HttpStatusCode != System.Net.HttpStatusCode.OK)
-                throw new Exception(ret.HttpStatusCode.ToString());
-
-            //设置访问权限
-            _ossClient.SetObjectAcl(BucketName, _objectKey, CannedAccessControlList.PublicRead);
-
-            //返回下载的url路径
-            return ret.Location;
+            return null;
         }
 
         public void OnUploadError()
