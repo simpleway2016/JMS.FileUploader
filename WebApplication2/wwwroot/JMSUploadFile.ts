@@ -109,11 +109,19 @@ export class JmsUploader {
         headers["Name"] = encodeURIComponent((<any>this.file).name);
         headers["Upload-Id"] = this.tranId;
 
-        var ret = await fetch(`${this.url}`, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(this.jsonObject)
-        });
+        var ret;
+        try {
+            ret = await fetch(`${this.url}`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(this.jsonObject)
+            });
+
+           
+        } catch (e) {
+            this.uploadReject(text);
+            return;
+        }
 
         var text = await ret.text();
         if (ret.status >= 300 || ret.status < 200) {
@@ -122,8 +130,9 @@ export class JmsUploader {
             else
                 this.uploadReject({ statusCode: ret.status });
         }
-        this.uploadResolve(text);
-
+        else {
+            this.uploadResolve(text);
+        }
     }
 
     private next = (uploadedSize: number) => {
